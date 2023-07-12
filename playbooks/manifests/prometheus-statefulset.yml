@@ -181,19 +181,6 @@ spec:
               cpu: 1000m
               ephemeral-storage: 512M
               memory: 2000M
-
-
-
-
-
-
-
-
-
-
-
-
-
           readinessProbe:
             tcpSocket:
               port: 9090
