@@ -65,3 +65,15 @@ Verify that the Kubernetes cluster is up:
 ```sh
 kubectl get nodes
 ```
+
+kafka cli:
+```
+kafka-topics --create --if-not-exists --topic input --bootstrap-server localhost:9092
+kafka-topics --create --if-not-exists --topic output --bootstrap-server localhost:9092
+
+kafka-topics --describe --topic input --bootstrap-server localhost:9092
+
+kafka-topics --list --bootstrap-server localhost:9092
+
+kafka-console-producer --bootstrap-server localhost:9092 --topic input --property "parse.key=true" --property "key.separator=:"
+```

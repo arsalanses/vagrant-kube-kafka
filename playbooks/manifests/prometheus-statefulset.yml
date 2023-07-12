@@ -1,0 +1,267 @@
+---
+# Source: aio-prometheus/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-prometheus
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+data:
+  prometheus-password: "T1FBMHZFbmFFZ1NzdWxIeVgxTFYxU3VMS0tlVzFXazM="
+type: Opaque
+---
+# Source: aio-prometheus/templates/cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-prometheus-config
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+data:
+  alerting_rules.yml: |-
+    # alter
+    
+  prometheus.yml: |-
+    rule_files:
+      - /etc/config/recording_rules.yml
+      - /etc/config/alerting_rules.yml
+  recording_rules.yml: |-
+    # record
+---
+# Source: aio-prometheus/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: my-prometheus-data
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+spec:
+  storageClassName: "rawfile-btrfs"
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "2Gi"
+---
+# Source: aio-prometheus/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-prometheus
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: main
+  selector:
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+---
+# Source: aio-prometheus/templates/sts.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-prometheus
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+spec:
+  serviceName: my-prometheus
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aio-prometheus
+      app.kubernetes.io/instance: my-prometheus
+  template:
+    metadata:
+      annotations:
+        checksum/config: 044fa9c6420fd08f72e14788f6e7364d038ac2dc0f4bcf4a8f692d93785244f2
+        checksum/secret: 8a5269537541e5a3b36f2490c8ed50a2b96426410967bc8331df2da2b2f05c50
+      labels:
+        app.kubernetes.io/name: aio-prometheus
+        app.kubernetes.io/instance: my-prometheus
+        darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      initContainers:
+        - name: bcrypt
+          image: "bitnami/apache:2.4.52-debian-10-r0"
+          imagePullPolicy: Always
+          command:
+            - /bin/bash
+            - -c
+            - |
+              if [ ! -f /config/web.yml ]; then
+                hash_passwd=$(htpasswd -bnBC 10 "" ${PROMETHEUS_PASSWORD} | tr -d ':\n')
+                printf "basic_auth_users:\n  ${PROMETHEUS_USERNAME}: ${hash_passwd}\n" >> /config/web.yml
+              fi
+          env:
+            - name: PROMETHEUS_USERNAME
+              value: "admin"
+            - name: PROMETHEUS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-prometheus
+                  key: prometheus-password
+          volumeMounts:
+            - name: data
+              mountPath: /config
+              subPath: config
+      securityContext:
+        runAsUser: 65534
+        runAsNonRoot: true
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+        - name: prometheus
+          image: "hub.hamdocker.ir/prom/prometheus:v2.45.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PROMETHEUS_USERNAME
+              value: "admin"
+            - name: PROMETHEUS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-prometheus
+                  key: prometheus-password
+          ports:
+            - name: main
+              containerPort: 9090
+              protocol: TCP
+          args:
+            - --storage.tsdb.retention.time=15d
+            - --config.file=/etc/config/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.console.libraries=/etc/prometheus/console_libraries
+            - --web.console.templates=/etc/prometheus/consoles
+            - --web.config.file=/config/web.yml
+            - --web.enable-lifecycle
+            - --web.enable-admin-api
+            - --storage.tsdb.wal-compression
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "/bin/sh","-c", "sleep 5" ]
+          resources:
+            limits:
+              cpu: 1000m
+              ephemeral-storage: 512M
+              memory: 2000M
+            requests:
+              cpu: 1000m
+              ephemeral-storage: 512M
+              memory: 2000M
+
+
+
+
+
+
+
+
+
+
+
+
+
+          readinessProbe:
+            tcpSocket:
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: my-prometheus-config
+              mountPath: /etc/config
+            - name: data
+              mountPath: /prometheus
+              subPath: data
+            - name: data
+              mountPath: /config
+              subPath: config
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: "my-prometheus-data"
+        - name: my-prometheus-config
+          configMap:
+            name: "my-prometheus-config"
+      nodeSelector:
+        darkube.hamravesh.com/deploy: "true"
+---
+# Source: aio-prometheus/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-prometheus-custom-subdomain
+  labels:
+    helm.sh/chart: aio-prometheus-0.1.1
+    app.kubernetes.io/name: aio-prometheus
+    app.kubernetes.io/instance: my-prometheus
+    app.kubernetes.io/version: "0.53.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
+  annotations:
+    projectcontour.io/response-timeout: infinity
+spec:
+  rules:
+    - host: "arsalanse.darkube.app"
+      http:
+        paths:
+          - path: "/"
+            backend:
+              service:
+                name: my-prometheus
+                port:
+                  name: "main"
+            pathType: "Prefix"
+---
+# Source: aio-prometheus/templates/redirect_https_middleware.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: my-prometheus-redirect
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

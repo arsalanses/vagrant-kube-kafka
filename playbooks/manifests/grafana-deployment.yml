@@ -1,0 +1,170 @@
+---
+# Source: aio-grafana/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: my-grafana-data
+  labels:
+    helm.sh/chart: aio-grafana-0.1.1
+    app.kubernetes.io/name: aio-grafana
+    app.kubernetes.io/instance: my-grafana
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
+spec:
+  storageClassName: "rawfile-btrfs"
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "2Gi"
+---
+# Source: aio-grafana/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-grafana
+  labels:
+    helm.sh/chart: aio-grafana-0.1.1
+    app.kubernetes.io/name: aio-grafana
+    app.kubernetes.io/instance: my-grafana
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: main
+  selector:
+    app.kubernetes.io/name: aio-grafana
+    app.kubernetes.io/instance: my-grafana
+---
+# Source: aio-grafana/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-grafana
+  labels:
+    helm.sh/chart: aio-grafana-0.1.1
+    app.kubernetes.io/name: aio-grafana
+    app.kubernetes.io/instance: my-grafana
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aio-grafana
+      app.kubernetes.io/instance: my-grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aio-grafana
+        app.kubernetes.io/instance: my-grafana
+        darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      initContainers:
+        - name: init
+          image: "hub.hamdocker.ir/grafana/grafana:9.5.5-ubuntu"
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/bin/sh"
+            - "-c"
+          args:
+            - |
+              touch /etc/grafana/grafana.ini
+          volumeMounts:
+            - name: data
+              mountPath: /etc/grafana
+              subPath: grafana/config
+      containers:
+        - name: grafana
+          image: "hub.hamdocker.ir/grafana/grafana:9.5.5-ubuntu"
+          imagePullPolicy: Always
+          ports:
+            - name: main
+              containerPort: 3000
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: "https://arsalanses.darkube.app"
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "cLGvGfgx0Y08bnotr61bmklHnDVxOEc8"
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1000M
+            requests:
+              cpu: 250m
+              memory: 1000M
+          readinessProbe:
+            httpGet:
+              path: /
+              port: main
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/grafana
+              subPath: grafana/data
+            - name: data
+              mountPath: /etc/grafana
+              subPath: grafana/config
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: my-grafana-data
+      nodeSelector:
+        darkube.hamravesh.com/deploy: "true"
+---
+# Source: aio-grafana/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-grafana-custom-subdomain
+  labels:
+    helm.sh/chart: aio-grafana-0.1.1
+    app.kubernetes.io/name: aio-grafana
+    app.kubernetes.io/instance: my-grafana
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
+  annotations:
+    projectcontour.io/response-timeout: infinity
+spec:
+  rules:
+    - host: "arsalanses.darkube.app"
+      http:
+        paths:
+          - path: "/"
+            backend:
+              service:
+                name: my-grafana
+                port:
+                  name: "main"
+            pathType: "Prefix"
+---
+# Source: aio-grafana/templates/redirect_https_middleware.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: my-grafana-redirect
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
