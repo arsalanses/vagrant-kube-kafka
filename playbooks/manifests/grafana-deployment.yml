@@ -10,7 +10,6 @@ metadata:
     app.kubernetes.io/instance: my-grafana
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
 spec:
   storageClassName: "rawfile-btrfs"
   accessModes:
@@ -30,7 +29,6 @@ metadata:
     app.kubernetes.io/instance: my-grafana
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
 spec:
   type: ClusterIP
   ports:
@@ -53,7 +51,6 @@ metadata:
     app.kubernetes.io/instance: my-grafana
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
 spec:
   replicas: 1
   strategy:
@@ -70,7 +67,6 @@ spec:
       labels:
         app.kubernetes.io/name: aio-grafana
         app.kubernetes.io/instance: my-grafana
-        darkube.hamravesh.com/app-id: 25ab317c-3ee8-411e-a78f-fd9dbcc67096
     spec:
       securityContext:
         fsGroup: 1000
@@ -100,7 +96,7 @@ spec:
               containerPort: 3000
           env:
             - name: GF_SERVER_ROOT_URL
-              value: "https://arsalanses.darkube.app"
+              value: "https://arvangrafana.arsalanses.ir"
             - name: GF_SECURITY_ADMIN_USER
               value: "admin"
             - name: GF_SECURITY_ADMIN_PASSWORD
@@ -129,8 +125,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: my-grafana-data
-      nodeSelector:
-        darkube.hamravesh.com/deploy: "true"
+      # nodeSelector:
 ---
 # Source: aio-grafana/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -148,7 +143,7 @@ metadata:
     projectcontour.io/response-timeout: infinity
 spec:
   rules:
-    - host: "arsalanses.darkube.app"
+    - host: "arvangrafana.arsalanses.ir"
       http:
         paths:
           - path: "/"

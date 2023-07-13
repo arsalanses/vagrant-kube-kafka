@@ -3,14 +3,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "my-kafka2-config"
+  name: "my-kafka-config"
   labels:
     helm.sh/chart: aio-kafka-0.1.0
     app.kubernetes.io/name: aio-kafka
-    app.kubernetes.io/instance: my-kafka2
+    app.kubernetes.io/instance: my-kafka
     app.kubernetes.io/version: "3.3.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 77e57d35-c749-466d-b703-85383a682e24
 data:
   server.properties: |-
     controller.quorum.voters=1@localhost:9093
@@ -27,14 +26,13 @@ data:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: my-kafka2-data
+  name: my-kafka-data
   labels:
     helm.sh/chart: aio-kafka-0.1.0
     app.kubernetes.io/name: aio-kafka
-    app.kubernetes.io/instance: my-kafka2
+    app.kubernetes.io/instance: my-kafka
     app.kubernetes.io/version: "3.3.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 77e57d35-c749-466d-b703-85383a682e24
 spec:
   storageClassName: "rawfile-btrfs"
   accessModes:
@@ -47,14 +45,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-kafka2
+  name: my-kafka
   labels:
     helm.sh/chart: aio-kafka-0.1.0
     app.kubernetes.io/name: aio-kafka
-    app.kubernetes.io/instance: my-kafka2
+    app.kubernetes.io/instance: my-kafka
     app.kubernetes.io/version: "3.3.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 77e57d35-c749-466d-b703-85383a682e24
 spec:
   type: ClusterIP
   ports:
@@ -68,35 +65,33 @@ spec:
     targetPort: 9093
   selector:
     app.kubernetes.io/name: aio-kafka
-    app.kubernetes.io/instance: my-kafka2
+    app.kubernetes.io/instance: my-kafka
 ---
 # Source: aio-kafka/templates/sts.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: my-kafka2
+  name: my-kafka
   labels:
     helm.sh/chart: aio-kafka-0.1.0
     app.kubernetes.io/name: aio-kafka
-    app.kubernetes.io/instance: my-kafka2
+    app.kubernetes.io/instance: my-kafka
     app.kubernetes.io/version: "3.3.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: 77e57d35-c749-466d-b703-85383a682e24
 spec:
-  serviceName: my-kafka2-kafka
+  serviceName: my-kafka-kafka
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: aio-kafka
-      app.kubernetes.io/instance: my-kafka2
+      app.kubernetes.io/instance: my-kafka
   template:
     metadata:
       annotations:
         checksum/config: fffb33bf531894fe207b30dacd543f2868e232967430fbaad973ad9758b9fc57
       labels:
         app.kubernetes.io/name: aio-kafka
-        app.kubernetes.io/instance: my-kafka2
-        darkube.hamravesh.com/app-id: 77e57d35-c749-466d-b703-85383a682e24
+        app.kubernetes.io/instance: my-kafka
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -136,7 +131,7 @@ spec:
           - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
             value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
           - name: KAFKA_ADVERTISED_LISTENERS
-            value: "PLAINTEXT://my-kafka2:9092"
+            value: "PLAINTEXT://my-kafka:9092"
           - name: KAFKA_NODE_ID
             value: "1"
           - name: KAFKA_CONTROLLER_QUORUM_VOTERS
@@ -167,9 +162,8 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: "my-kafka2-data"
+          claimName: "my-kafka-data"
       - name: config
         configMap:
-          name: "my-kafka2-config"
-      nodeSelector:
-        darkube.hamravesh.com/deploy: "true"
+          name: "my-kafka-config"
+      # nodeSelector:

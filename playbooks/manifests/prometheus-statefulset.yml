@@ -10,7 +10,6 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
 data:
   prometheus-password: "T1FBMHZFbmFFZ1NzdWxIeVgxTFYxU3VMS0tlVzFXazM="
 type: Opaque
@@ -26,7 +25,6 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
 data:
   alerting_rules.yml: |-
     # alter
@@ -49,7 +47,6 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
 spec:
   storageClassName: "rawfile-btrfs"
   accessModes:
@@ -69,7 +66,6 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
 spec:
   type: ClusterIP
   ports:
@@ -92,7 +88,6 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
 spec:
   serviceName: my-prometheus
   replicas: 1
@@ -108,7 +103,6 @@ spec:
       labels:
         app.kubernetes.io/name: aio-prometheus
         app.kubernetes.io/instance: my-prometheus
-        darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -213,8 +207,7 @@ spec:
         - name: my-prometheus-config
           configMap:
             name: "my-prometheus-config"
-      nodeSelector:
-        darkube.hamravesh.com/deploy: "true"
+      # nodeSelector:
 ---
 # Source: aio-prometheus/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -227,12 +220,11 @@ metadata:
     app.kubernetes.io/instance: my-prometheus
     app.kubernetes.io/version: "0.53.0"
     app.kubernetes.io/managed-by: Helm
-    darkube.hamravesh.com/app-id: b1497cb1-3db1-44e6-be92-b22f22f82f53
   annotations:
     projectcontour.io/response-timeout: infinity
 spec:
   rules:
-    - host: "arsalanse.darkube.app"
+    - host: "arvanprom.arsalanses.ir"
       http:
         paths:
           - path: "/"
