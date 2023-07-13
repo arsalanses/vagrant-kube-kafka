@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumers-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-consumers-exporter
+  template:
+    metadata:
+      labels:
+        app: kafka-consumers-exporter
+    spec:
+      containers:
+        - name: kafka-consumers-exporter
+          image: solsson/kafka-consumers-prometheus:latest
+          args:
+            - "--bootstrap.servers=kafka:9092"
+            - "--group-id=my-consumer-group"
+            - "--topics=my-topic"
+          ports:
+            - name: metrics
+              containerPort: 9308
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
