@@ -1,4 +1,9 @@
 # Vagrantfile for Docker, Kubernetes, and Kafka Setup
+
+<p align="center">
+    <img src="./architecture.png" alt="diagram" width="75%">
+</p>
+
 This Vagrantfile sets up a virtual machine with Docker, Kubernetes, and Kafka installed using Ansible. It uses VirtualBox as the virtualization provider.
 
 ## Requirements
