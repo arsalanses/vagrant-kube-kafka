@@ -6,6 +6,10 @@
 
 This Vagrantfile sets up a virtual machine with Docker, Kubernetes, and Kafka installed using Ansible. It uses VirtualBox as the virtualization provider.
 
+```
+This project uses semantic-release to automate the release process. Semantic-release analyzes commit messages to determine the appropriate version number and automatically generates changelogs and releases.
+```
+
 ## Requirements
 - VirtualBox installed on your machine
 - Vagrant installed on your machine
