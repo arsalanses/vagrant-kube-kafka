@@ -49,6 +49,7 @@
     ansible.builtin.pip:
       name: docker
       executable: pip3
+      extra_args: --break-system-packages
 
   # - name: Log into DockerHub
   #   docker_login:
