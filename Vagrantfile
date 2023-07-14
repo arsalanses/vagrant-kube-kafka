@@ -4,6 +4,14 @@ N = 1
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
 
+    config.vm.provision "shell", inline: <<-SHELL
+        sudo apt update
+        sudo apt install -y software-properties-common
+        sudo apt-add-repository -y ppa:ansible/ansible
+        sudo apt update
+        sudo apt install -y ansible
+    SHELL
+
     config.vm.provider "virtualbox" do |v|
         v.memory = 1024
         v.cpus = 1
