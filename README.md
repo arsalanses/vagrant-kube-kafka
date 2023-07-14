@@ -13,6 +13,9 @@ This project uses semantic-release to automate the release process. Semantic-rel
 ## Requirements
 - VirtualBox installed on your machine
 - Vagrant installed on your machine
+```
+apt update && apt upgrade -y && apt install -y virtualbox virtualbox-ext-pack vagrant ansible-core && reboot
+```
 
 ## Installation
 1. Clone this repository to your local machine.
