@@ -55,16 +55,16 @@
   #     username: [your username, not email address]
   #     password: [your password]
 
-  - name: Remove containerd config file
-    file:
-      path: /etc/containerd/config.toml
-      state: absent
+  # - name: Remove containerd config file
+  #   file:
+  #     path: /etc/containerd/config.toml
+  #     state: absent
 
-  - name: Restart containerd
-    service:
-      name: containerd
-      daemon_reload: yes
-      state: restarted
+  # - name: Restart containerd
+  #   service:
+  #     name: containerd
+  #     daemon_reload: yes
+  #     state: restarted
 
 # Kubelet will not start if the system has swap enabled, so we are disabling swap using the below code.
   - name: Remove swapfile from /etc/fstab
