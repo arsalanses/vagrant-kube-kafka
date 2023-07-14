@@ -1,4 +1,4 @@
-IMAGE_NAME = "ubuntu/xenial64"
+IMAGE_NAME = "ubuntu/trusty64"
 N = 1
 
 Vagrant.configure("2") do |config|
