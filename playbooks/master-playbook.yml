@@ -89,7 +89,7 @@
 
   - name: Adding apt repository for Kubernetes
     apt_repository:
-      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      repo: deb https://apt.kubernetes.io/ kubernetes-lunar main
       state: present
       filename: kubernetes.list
 
