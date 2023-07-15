@@ -32,10 +32,10 @@
       name: containerd
       state: absent
 
-  - name: Update apt packages
-    become: true
-    apt:
-      update_cache: yes
+  # - name: Update apt packages
+  #   become: true
+  #   apt:
+  #     update_cache: yes
 
   - name: Install docker and its dependecies
     apt: 
@@ -129,9 +129,9 @@
       update_cache: yes
     vars:
       packages:
-        - kubelet
-        - kubeadm
-        - kubectl
+        - kubelet=1.25.5-00
+        - kubeadm=1.25.5-00
+        - kubectl=1.25.5-00
 
   - name: Configure node ip
     lineinfile:
