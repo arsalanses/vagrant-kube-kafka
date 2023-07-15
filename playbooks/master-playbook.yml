@@ -26,6 +26,17 @@
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
       state: present
 
+  - name: Remove containerd
+    become: true
+    apt:
+      name: containerd
+      state: absent
+
+  - name: Update apt packages
+    become: true
+    apt:
+      update_cache: yes
+
   - name: Install docker and its dependecies
     apt: 
       name: "{{ packages }}"
@@ -39,6 +50,15 @@
       - python3-pip
     notify:
       - docker status
+
+  - name: Print containerd version
+    become: true
+    shell: containerd --version
+    register: containerd_version
+
+  - name: Display containerd version
+    debug:
+      var: containerd_version.stdout
 
   - name: Add vagrant user to docker group
     user:
