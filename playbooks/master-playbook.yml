@@ -56,7 +56,7 @@
     shell: |
       set -e
       export DEBIAN_FRONTEND=noninteractive
-      curl -L https://github.com/containerd/containerd/releases/download/v1.7.2/containerd-1.7.2-linux-amd64.tar.gz -o containerd.tar.gz
+      curl -L https://github.com/containerd/containerd/releases/download/v1.6.21/containerd-1.6.21-linux-amd64.tar.gz -o containerd.tar.gz
       tar -xf containerd.tar.gz --strip-components=1 -C /usr/local/bin/
       rm containerd.tar.gz
 
