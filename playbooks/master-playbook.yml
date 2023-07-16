@@ -46,28 +46,19 @@
       packages:
       - docker-ce 
       - docker-ce-cli 
-      - containerd.io
+      # - containerd.io
       - python3-pip
     notify:
       - docker status
 
-  # - name: Install containerd
-  #   become: true
-  #   shell: |
-  #     set -e
-  #     export DEBIAN_FRONTEND=noninteractive
-  #     curl -L https://github.com/containerd/containerd/releases/download/v1.6.21/containerd-1.6.21-linux-amd64.tar.gz -o containerd.tar.gz
-  #     tar -xf containerd.tar.gz --strip-components=1 -C /usr/local/bin/
-  #     rm containerd.tar.gz
-
-  - name: Print containerd version
+  - name: Install containerd
     become: true
-    shell: containerd --version
-    register: containerd_version
-
-  - name: Display containerd version
-    debug:
-      var: containerd_version.stdout
+    shell: |
+      set -e
+      export DEBIAN_FRONTEND=noninteractive
+      curl -L https://github.com/containerd/containerd/releases/download/v1.6.21/containerd-1.6.21-linux-amd64.tar.gz -o containerd.tar.gz
+      tar -xf containerd.tar.gz --strip-components=1 -C /usr/local/bin/
+      rm containerd.tar.gz
 
   - name: Add vagrant user to docker group
     user:
@@ -85,16 +76,25 @@
   #     username: [your username, not email address]
   #     password: [your password]
 
-  # - name: Remove containerd config file
-  #   file:
-  #     path: /etc/containerd/config.toml
-  #     state: absent
+  - name: Remove containerd config file
+    file:
+      path: /etc/containerd/config.toml
+      state: absent
 
-  # - name: Restart containerd
-  #   service:
-  #     name: containerd
-  #     daemon_reload: yes
-  #     state: restarted
+  - name: Restart containerd
+    service:
+      name: containerd
+      daemon_reload: yes
+      state: restarted
+
+  - name: Print containerd version
+    become: true
+    shell: containerd --version
+    register: containerd_version
+
+  - name: Display containerd version
+    debug:
+      var: containerd_version.stdout
 
 # Kubelet will not start if the system has swap enabled, so we are disabling swap using the below code.
   - name: Remove swapfile from /etc/fstab
