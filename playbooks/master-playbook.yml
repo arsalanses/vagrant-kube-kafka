@@ -26,11 +26,11 @@
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
       state: present
 
-  # - name: Remove containerd
-  #   become: true
-  #   apt:
-  #     name: containerd
-  #     state: absent
+  - name: Remove containerd
+    become: true
+    apt:
+      name: containerd
+      state: absent
 
   # - name: Update apt packages
   #   become: true
@@ -46,19 +46,19 @@
       packages:
       - docker-ce 
       - docker-ce-cli 
-      - containerd.io
+      # - containerd.io
       - python3-pip
     notify:
       - docker status
 
-  # - name: Install containerd
-  #   become: true
-  #   shell: |
-  #     set -e
-  #     export DEBIAN_FRONTEND=noninteractive
-  #     curl -L https://github.com/containerd/containerd/releases/download/v1.7.2/containerd-1.7.2-linux-amd64.tar.gz -o containerd.tar.gz
-  #     tar -xf containerd.tar.gz --strip-components=1 -C /usr/local/bin/
-  #     rm containerd.tar.gz
+  - name: Install containerd
+    become: true
+    shell: |
+      set -e
+      export DEBIAN_FRONTEND=noninteractive
+      curl -L https://github.com/containerd/containerd/releases/download/v1.7.2/containerd-1.7.2-linux-amd64.tar.gz -o containerd.tar.gz
+      tar -xf containerd.tar.gz --strip-components=1 -C /usr/local/bin/
+      rm containerd.tar.gz
 
   - name: Print containerd version
     become: true
@@ -129,9 +129,9 @@
       update_cache: yes
     vars:
       packages:
-        - kubelet=1.21.0-00
-        - kubeadm=1.21.0-00
-        - kubectl=1.21.0-00
+        - kubelet=1.24.0-00
+        - kubeadm=1.24.0-00
+        - kubectl=1.24.0-00
 
   - name: Configure node ip
     lineinfile:
